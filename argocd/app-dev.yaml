@@ -7,9 +7,14 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/Swathi-Velogoti/Devops-project.git
-    targetRevision: main
-    path: k8s-manifests
+  repoURL: https://github.com/Swathi-Velogoti/Devops-project.git
+  targetRevision: main
+  path: helm/python-app
+  helm:
+    valueFiles:
+      - values-dev.yaml
+
+
 
   destination:
     server: https://kubernetes.default.svc

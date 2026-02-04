@@ -1,0 +1,13 @@
+replicaCount: 2
+
+image:
+  repository: ghcr.io/swathi-velogoti/devops-project
+  tag: latest
+
+env:
+  APP_ENV: dev
+
+ingress:
+  enabled: true
+  className: nginx
+  host: dev.local
