@@ -1,0 +1,77 @@
+name: CD - Build, Push, Update Helm, Deploy via Argo
+
+on:
+  push:
+    branches: ["main"]
+    paths-ignore:
+      - "helm/python-app/values-dev.yaml"
+
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build-push-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set lowercase image name
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          REPO=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE=ghcr.io/$OWNER/$REPO" >> $GITHUB_ENV
+          echo "TAG=${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        run: |
+          docker build -t $IMAGE:$TAG -t $IMAGE:latest .
+          docker push $IMAGE:$TAG
+          docker push $IMAGE:latest
+
+      - name: Update Helm values-dev.yaml with new image tag
+        run: |
+          FILE="helm/python-app/values-dev.yaml"
+
+          # If image.tag exists, replace it; otherwise append it
+          if grep -qE '^\s*tag:\s*' "$FILE"; then
+            sed -i.bak "s/^\(\s*tag:\s*\).*/\1$TAG/" "$FILE"
+          else
+            # Ensure image section exists
+            if ! grep -qE '^\s*image:\s*$' "$FILE"; then
+              echo "" >> "$FILE"
+              echo "image:" >> "$FILE"
+            fi
+            echo "  tag: $TAG" >> "$FILE"
+          fi
+
+          rm -f "$FILE.bak"
+          echo "Updated $FILE to tag=$TAG"
+          cat "$FILE"
+
+      - name: Commit and push Helm change
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Avoid infinite loop: only commit if there is a real change
+          git add helm/python-app/values-dev.yaml
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "chore(cd): update dev image tag to $TAG [skip ci]"
+          git push

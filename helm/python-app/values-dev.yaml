@@ -5,3 +5,6 @@ env:
 
 ingress:
   host: dev.local
+
+image:
+  tag: latest
