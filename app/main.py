@@ -7,7 +7,7 @@ app = Flask(__name__)
 def home():
     return {
         "message": "Hello from Python DevOps demo!",
-        "env": os.getenv("APP_ENV", "local")
+        "env": os.getenv("APP_ENV", "dev")
     }
 
 if __name__ == "__main__":
