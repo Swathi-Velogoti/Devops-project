@@ -23,12 +23,10 @@ jobs:
 
       - name: Set lowercase image name
         run: |
-          - name: Set image name
-             run: |
-               OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-               REPO=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
-               echo "IMAGE=ghcr.io/$OWNER/$REPO" >> $GITHUB_ENV
-               echo "TAG=${{ github.sha }}" >> $GITHUB_ENV
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          REPO=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE=ghcr.io/$OWNER/$REPO" >> $GITHUB_ENV
+          echo "TAG=${{ github.sha }}" >> $GITHUB_ENV
  
 
       - name: Log in to GHCR
