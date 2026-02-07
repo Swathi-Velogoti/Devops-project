@@ -7,4 +7,4 @@ ingress:
   host: dev.local
 
 image:
-  tag: 16300164eccf28063fae9d9a13fe6ab50db72542
+  tag: 64868ae1e5297dbb5768e260262eacc6b0bcf0ad
