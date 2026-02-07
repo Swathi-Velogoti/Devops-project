@@ -6,7 +6,7 @@ app = Flask(__name__)
 @app.get("/")
 def home():
     return {
-        "message": "hey,Hello from Swathi DevOps demo!",
+        "message": "Hello from Swathi DevOps demo!",
         "env": os.getenv("APP_ENV", "local")
     }
 
